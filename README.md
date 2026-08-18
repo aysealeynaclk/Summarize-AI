@@ -69,6 +69,15 @@ npm run dev
 
 Uygulama: http://localhost:5173
 
+## Tek Tuşla Çalıştırma
+
+Kurulumu bir kez tamamladıktan sonra (yukarıdaki adımlar), her seferinde backend/frontend'i tek tek açmak yerine proje kökündeki script'leri kullanabilirsin:
+
+- **`baslat.bat`** — çift tıkla, backend + frontend'i ayrı pencerelerde başlatır ve tarayıcıda `http://localhost:5173`'ü otomatik açar.
+- **`kapat.bat`** — çift tıkla, backend ve frontend'i durdurur (8000/5173 portlarını dinleyen süreçleri kapatır).
+
+İkisi de arka planda `yonet.ps1` PowerShell script'ini çalıştırır. PostgreSQL servisinin ayrıca çalışıyor olması gerekir (genelde Windows açılışında otomatik başlar).
+
 ## Kullanıcı Akışı
 
 1. **Kayıt Ol** sayfasından yeni bir kullanıcı oluşturulur → `status = pending`.
