@@ -210,20 +210,23 @@ onMounted(loadUsers)
               {{ new Date(user.created_at).toLocaleDateString('tr-TR') }}
             </td>
             <td class="px-4 py-3 space-x-2">
-              <button
-                v-if="user.status === 'active'"
-                @click="updateStatus(user, 'inactive')"
-                class="text-xs font-medium text-slate-600 hover:text-slate-800 underline"
-              >
-                Pasife Al
-              </button>
-              <button
-                v-else
-                @click="updateStatus(user, 'active')"
-                class="text-xs font-medium text-green-600 hover:text-green-800 underline"
-              >
-                Aktif Et
-              </button>
+              <template v-if="user.role !== 'admin'">
+                <button
+                  v-if="user.status === 'active'"
+                  @click="updateStatus(user, 'inactive')"
+                  class="text-xs font-medium text-slate-600 hover:text-slate-800 underline"
+                >
+                  Pasife Al
+                </button>
+                <button
+                  v-else
+                  @click="updateStatus(user, 'active')"
+                  class="text-xs font-medium text-green-600 hover:text-green-800 underline"
+                >
+                  Aktif Et
+                </button>
+              </template>
+              <span v-else class="text-xs text-slate-400 italic">admin hesabı korunuyor</span>
               <button
                 @click="resetPasswordFor = resetPasswordFor === user.id ? null : user.id"
                 class="text-xs font-medium text-indigo-600 hover:text-indigo-800 underline"

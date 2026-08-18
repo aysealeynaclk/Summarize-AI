@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import require_admin
-from app.models import AILog, Role, User
+from app.models import AILog, Role, Status, User
 from app.schemas import (
     AdminCreateUserRequest,
     AdminUpdateUserRequest,
@@ -68,6 +68,11 @@ def update_user(
         )
 
     if payload.status is not None:
+        if user.role == Role.admin and payload.status != Status.active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Admin hesapları pasife alınamaz veya onay bekletilemez.",
+            )
         user.status = payload.status
 
     if payload.new_password:
