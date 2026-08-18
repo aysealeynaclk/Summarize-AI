@@ -26,6 +26,22 @@ function Stop-PortProcess {
     }
 }
 
+function Stop-StrayProjectProcess {
+    # Onceki calistirmalardan kalan, port dinlemeyen ama hala calisan
+    # (uvicorn/vite) surecleri de temizler - "hayalet" surec birikmesini onler.
+    $candidates = Get-CimInstance Win32_Process -Filter "Name='python.exe' OR Name='node.exe'" -ErrorAction SilentlyContinue
+    foreach ($proc in $candidates) {
+        if ($proc.CommandLine -and ($proc.CommandLine -like "*Summarize-AI*")) {
+            try {
+                Stop-Process -Id $proc.ProcessId -Force -ErrorAction Stop
+                Write-Host "  Artik surec temizlendi (PID $($proc.ProcessId))"
+            } catch {
+                # zaten kapanmis olabilir, sorun degil
+            }
+        }
+    }
+}
+
 if ($Action -eq "start") {
     Write-Host "=== Summarize-AI baslatiliyor ===" -ForegroundColor Cyan
 
@@ -56,6 +72,9 @@ elseif ($Action -eq "stop") {
 
     Write-Host "Frontend (5173) durduruluyor..."
     Stop-PortProcess -Port 5173
+
+    Write-Host "Artik surecler kontrol ediliyor..."
+    Stop-StrayProjectProcess
 
     Write-Host "Tamamlandi." -ForegroundColor Green
 }
