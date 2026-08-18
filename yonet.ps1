@@ -45,15 +45,17 @@ function Stop-StrayProjectProcess {
 if ($Action -eq "start") {
     Write-Host "=== Summarize-AI baslatiliyor ===" -ForegroundColor Cyan
 
+    # -NoExit KULLANILMIYOR: icindeki surec (uvicorn/npm) durdurulunca
+    # pencere de otomatik kapansin, bos komut istemi olarak birikmesin.
     Write-Host "Backend baslatiliyor (port 8000)..."
     Start-Process powershell -ArgumentList @(
-        "-NoExit", "-ExecutionPolicy", "Bypass", "-Command",
+        "-ExecutionPolicy", "Bypass", "-Command",
         "cd '$backendDir'; .\.venv\Scripts\Activate.ps1; uvicorn app.main:app --reload --port 8000"
     ) -WindowStyle Normal
 
     Write-Host "Frontend baslatiliyor (port 5173)..."
     Start-Process powershell -ArgumentList @(
-        "-NoExit", "-ExecutionPolicy", "Bypass", "-Command",
+        "-ExecutionPolicy", "Bypass", "-Command",
         "cd '$frontendDir'; npm run dev"
     ) -WindowStyle Normal
 
