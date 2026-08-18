@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import apiClient from '../api/client'
+
+const { t } = useI18n()
 
 const logs = ref([])
 const error = ref('')
@@ -13,7 +16,7 @@ async function loadLogs() {
     const { data } = await apiClient.get('/admin/logs')
     logs.value = data
   } catch (err) {
-    error.value = err.response?.data?.detail || 'Loglar yüklenemedi.'
+    error.value = err.response?.data?.detail || t('adminLogs.genericError')
   } finally {
     loading.value = false
   }
@@ -29,8 +32,8 @@ onMounted(loadLogs)
 
 <template>
   <div class="max-w-5xl mx-auto px-4 py-10">
-    <h1 class="text-2xl font-bold text-slate-800 mb-1">AI Log Görüntüleme</h1>
-    <p class="text-slate-500 mb-6">Kullanıcıların yazdığı metinler ve AI özet yanıtları.</p>
+    <h1 class="text-2xl font-bold text-slate-800 mb-1">{{ t('adminLogs.title') }}</h1>
+    <p class="text-slate-500 mb-6">{{ t('adminLogs.subtitle') }}</p>
 
     <p v-if="error" class="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-4">
       {{ error }}
@@ -40,19 +43,19 @@ onMounted(loadLogs)
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left text-slate-500 border-b border-slate-100">
-            <th class="px-4 py-3 font-medium">Tarih</th>
-            <th class="px-4 py-3 font-medium">Kullanıcı</th>
-            <th class="px-4 py-3 font-medium">Girdi</th>
-            <th class="px-4 py-3 font-medium">Özet</th>
-            <th class="px-4 py-3 font-medium">Sağlayıcı</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminLogs.date') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminLogs.user') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminLogs.input') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminLogs.summary') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminLogs.provider') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="5" class="px-4 py-6 text-center text-slate-400">Yükleniyor...</td>
+            <td colspan="5" class="px-4 py-6 text-center text-slate-400">{{ t('adminLogs.loading') }}</td>
           </tr>
           <tr v-else-if="!logs.length">
-            <td colspan="5" class="px-4 py-6 text-center text-slate-400">Henüz log yok.</td>
+            <td colspan="5" class="px-4 py-6 text-center text-slate-400">{{ t('adminLogs.empty') }}</td>
           </tr>
           <tr v-for="log in logs" :key="log.id" class="border-b border-slate-50 last:border-0">
             <td class="px-4 py-3 text-slate-500 whitespace-nowrap">

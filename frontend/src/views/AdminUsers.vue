@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import apiClient from '../api/client'
+
+const { t } = useI18n()
 
 const users = ref([])
 const error = ref('')
@@ -17,11 +20,11 @@ const newPassword = ref('')
 const pendingUsers = computed(() => users.value.filter((u) => u.status === 'pending'))
 const otherUsers = computed(() => users.value.filter((u) => u.status !== 'pending'))
 
-const statusLabel = {
-  pending: 'Onay Bekliyor',
-  active: 'Aktif',
-  inactive: 'Pasif',
-}
+const statusLabel = computed(() => ({
+  pending: t('adminUsers.statusPending'),
+  active: t('adminUsers.statusActive'),
+  inactive: t('adminUsers.statusInactive'),
+}))
 
 const statusStyle = {
   pending: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -36,7 +39,7 @@ async function loadUsers() {
     const { data } = await apiClient.get('/admin/users')
     users.value = data
   } catch (err) {
-    error.value = err.response?.data?.detail || 'Kullanıcılar yüklenemedi.'
+    error.value = err.response?.data?.detail || t('adminUsers.genericError')
   } finally {
     loading.value = false
   }
@@ -48,7 +51,7 @@ async function updateStatus(user, status) {
     await apiClient.patch(`/admin/users/${user.id}`, { status })
     await loadUsers()
   } catch (err) {
-    actionError.value = err.response?.data?.detail || 'İşlem başarısız oldu.'
+    actionError.value = err.response?.data?.detail || t('adminUsers.actionError')
   }
 }
 
@@ -60,7 +63,7 @@ async function submitResetPassword(user) {
     newPassword.value = ''
     await loadUsers()
   } catch (err) {
-    actionError.value = err.response?.data?.detail || 'Şifre güncellenemedi.'
+    actionError.value = err.response?.data?.detail || t('adminUsers.actionError')
   }
 }
 
@@ -73,7 +76,7 @@ async function submitCreateUser() {
     showCreateForm.value = false
     await loadUsers()
   } catch (err) {
-    actionError.value = err.response?.data?.detail || 'Kullanıcı oluşturulamadı.'
+    actionError.value = err.response?.data?.detail || t('adminUsers.genericError')
   } finally {
     creating.value = false
   }
@@ -86,14 +89,14 @@ onMounted(loadUsers)
   <div class="max-w-5xl mx-auto px-4 py-10">
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-800 mb-1">Kullanıcı Yönetimi</h1>
-        <p class="text-slate-500">Kayıtları onayla, kullanıcı oluştur, şifre sıfırla.</p>
+        <h1 class="text-2xl font-bold text-slate-800 mb-1">{{ t('adminUsers.title') }}</h1>
+        <p class="text-slate-500">{{ t('adminUsers.subtitle') }}</p>
       </div>
       <button
         @click="showCreateForm = !showCreateForm"
         class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
       >
-        {{ showCreateForm ? 'Vazgeç' : '+ Yeni Kullanıcı' }}
+        {{ showCreateForm ? t('adminUsers.cancel') : t('adminUsers.newUser') }}
       </button>
     </div>
 
@@ -107,7 +110,7 @@ onMounted(loadUsers)
     <div v-if="showCreateForm" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8 space-y-4">
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Kullanıcı adı / E-posta</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('adminUsers.usernameLabel') }}</label>
           <input
             v-model="newUser.username_or_email"
             type="text"
@@ -115,7 +118,7 @@ onMounted(loadUsers)
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Şifre</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('adminUsers.passwordLabel') }}</label>
           <input
             v-model="newUser.password"
             type="text"
@@ -123,7 +126,7 @@ onMounted(loadUsers)
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Rol</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('adminUsers.roleLabel') }}</label>
           <select
             v-model="newUser.role"
             class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -133,7 +136,7 @@ onMounted(loadUsers)
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Durum</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('adminUsers.statusLabel') }}</label>
           <select
             v-model="newUser.status"
             class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -149,12 +152,12 @@ onMounted(loadUsers)
         :disabled="creating"
         class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
       >
-        {{ creating ? 'Oluşturuluyor...' : 'Kullanıcıyı Oluştur' }}
+        {{ creating ? t('adminUsers.creating') : t('adminUsers.createSubmit') }}
       </button>
     </div>
 
     <div v-if="pendingUsers.length" class="mb-8">
-      <h2 class="text-sm font-semibold text-amber-600 mb-3">Onay Bekleyenler ({{ pendingUsers.length }})</h2>
+      <h2 class="text-sm font-semibold text-amber-600 mb-3">{{ t('adminUsers.pendingTitle') }} ({{ pendingUsers.length }})</h2>
       <ul class="space-y-2">
         <li
           v-for="user in pendingUsers"
@@ -167,13 +170,13 @@ onMounted(loadUsers)
               @click="updateStatus(user, 'active')"
               class="text-xs font-medium bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md transition"
             >
-              Onayla
+              {{ t('adminUsers.approve') }}
             </button>
             <button
               @click="updateStatus(user, 'inactive')"
               class="text-xs font-medium bg-slate-500 hover:bg-slate-600 text-white px-3 py-1.5 rounded-md transition"
             >
-              Reddet
+              {{ t('adminUsers.reject') }}
             </button>
           </div>
         </li>
@@ -184,19 +187,19 @@ onMounted(loadUsers)
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left text-slate-500 border-b border-slate-100">
-            <th class="px-4 py-3 font-medium">Kullanıcı</th>
-            <th class="px-4 py-3 font-medium">Rol</th>
-            <th class="px-4 py-3 font-medium">Durum</th>
-            <th class="px-4 py-3 font-medium">Kayıt Tarihi</th>
-            <th class="px-4 py-3 font-medium">İşlemler</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminUsers.tableUser') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminUsers.tableRole') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminUsers.tableStatus') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminUsers.tableCreatedAt') }}</th>
+            <th class="px-4 py-3 font-medium">{{ t('adminUsers.tableActions') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="5" class="px-4 py-6 text-center text-slate-400">Yükleniyor...</td>
+            <td colspan="5" class="px-4 py-6 text-center text-slate-400">{{ t('adminUsers.loading') }}</td>
           </tr>
           <tr v-else-if="!otherUsers.length">
-            <td colspan="5" class="px-4 py-6 text-center text-slate-400">Kullanıcı yok.</td>
+            <td colspan="5" class="px-4 py-6 text-center text-slate-400">{{ t('adminUsers.empty') }}</td>
           </tr>
           <tr v-for="user in otherUsers" :key="user.id" class="border-b border-slate-50 last:border-0">
             <td class="px-4 py-3 text-slate-700">{{ user.username_or_email }}</td>
@@ -216,22 +219,22 @@ onMounted(loadUsers)
                   @click="updateStatus(user, 'inactive')"
                   class="text-xs font-medium text-slate-600 hover:text-slate-800 underline"
                 >
-                  Pasife Al
+                  {{ t('adminUsers.deactivate') }}
                 </button>
                 <button
                   v-else
                   @click="updateStatus(user, 'active')"
                   class="text-xs font-medium text-green-600 hover:text-green-800 underline"
                 >
-                  Aktif Et
+                  {{ t('adminUsers.activate') }}
                 </button>
               </template>
-              <span v-else class="text-xs text-slate-400 italic">admin hesabı korunuyor</span>
+              <span v-else class="text-xs text-slate-400 italic">{{ t('adminUsers.adminProtected') }}</span>
               <button
                 @click="resetPasswordFor = resetPasswordFor === user.id ? null : user.id"
                 class="text-xs font-medium text-indigo-600 hover:text-indigo-800 underline"
               >
-                Şifre Sıfırla
+                {{ t('adminUsers.resetPassword') }}
               </button>
             </td>
           </tr>
@@ -245,11 +248,11 @@ onMounted(loadUsers)
       @click.self="resetPasswordFor = null"
     >
       <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h3 class="font-semibold text-slate-800 mb-4">Yeni Şifre Belirle</h3>
+        <h3 class="font-semibold text-slate-800 mb-4">{{ t('adminUsers.resetPasswordTitle') }}</h3>
         <input
           v-model="newPassword"
           type="text"
-          placeholder="Yeni şifre"
+          :placeholder="t('adminUsers.resetPasswordPlaceholder')"
           class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
         />
         <div class="flex gap-2 justify-end">
@@ -257,13 +260,13 @@ onMounted(loadUsers)
             @click="resetPasswordFor = null"
             class="text-sm px-3 py-2 rounded-lg border border-slate-300 text-slate-600"
           >
-            Vazgeç
+            {{ t('adminUsers.cancel') }}
           </button>
           <button
             @click="submitResetPassword(users.find((u) => u.id === resetPasswordFor))"
             class="text-sm px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
           >
-            Kaydet
+            {{ t('adminUsers.save') }}
           </button>
         </div>
       </div>

@@ -1,11 +1,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiClient from '../api/client'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const usernameOrEmail = ref('')
 const password = ref('')
@@ -23,7 +25,7 @@ async function handleSubmit() {
     auth.setSession(data.access_token, data.role)
     router.push({ name: 'home' })
   } catch (err) {
-    error.value = err.response?.data?.detail || 'Giriş yapılamadı, lütfen tekrar deneyin.'
+    error.value = err.response?.data?.detail || t('login.genericError')
   } finally {
     loading.value = false
   }
@@ -33,12 +35,12 @@ async function handleSubmit() {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-slate-100 px-4">
     <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
-      <h1 class="text-2xl font-bold text-center text-indigo-600 mb-1">Summarize-AI</h1>
-      <p class="text-center text-sm text-slate-500 mb-6">Hesabına giriş yap</p>
+      <h1 class="text-2xl font-bold text-center text-indigo-600 mb-1">{{ t('login.title') }}</h1>
+      <p class="text-center text-sm text-slate-500 mb-6">{{ t('login.subtitle') }}</p>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Kullanıcı adı / E-posta</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('login.usernameLabel') }}</label>
           <input
             v-model="usernameOrEmail"
             type="text"
@@ -47,7 +49,7 @@ async function handleSubmit() {
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Şifre</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('login.passwordLabel') }}</label>
           <input
             v-model="password"
             type="password"
@@ -65,13 +67,13 @@ async function handleSubmit() {
           :disabled="loading"
           class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition"
         >
-          {{ loading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}
+          {{ loading ? t('login.submitting') : t('login.submit') }}
         </button>
       </form>
 
       <p class="text-center text-sm text-slate-500 mt-6">
-        Hesabın yok mu?
-        <router-link to="/register" class="text-indigo-600 font-medium hover:underline">Kayıt Ol</router-link>
+        {{ t('login.noAccount') }}
+        <router-link to="/register" class="text-indigo-600 font-medium hover:underline">{{ t('login.registerLink') }}</router-link>
       </p>
     </div>
   </div>
