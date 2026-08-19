@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import router from '../router'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
@@ -18,7 +19,11 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const auth = useAuthStore()
+      const wasAuthenticated = auth.isAuthenticated
       auth.logout()
+      if (wasAuthenticated && router.currentRoute.value.name !== 'login') {
+        router.push({ name: 'login' })
+      }
     }
     return Promise.reject(error)
   }
